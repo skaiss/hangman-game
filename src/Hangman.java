@@ -201,11 +201,11 @@ public class Hangman {
         return true;
     }
 
-    private static void rightGuessMessage(int mistakes) {
+    private static void rightGuessMessage() {
         System.out.println("guess is right!  " + "\n" +
                 "used letters: " + USED_LETTERS + "\n" +
-                "number of mistakes: " + mistakes + "\n" +
-                "number of tries left: " + (MAX_MISTAKES - mistakes));
+                "number of mistakes: " + mistakesCount + "\n" +
+                "number of tries left: " + (MAX_MISTAKES - mistakesCount));
     }
 
     private static void mistakeMessage() {
@@ -222,7 +222,7 @@ public class Hangman {
                 letterToGuess--;
             }
         }
-        rightGuessMessage(mistakesCount);
+        rightGuessMessage();
     }
 
     private static void guessIsNotRight() {
