@@ -69,7 +69,7 @@ public class Hangman {
       ==========="""
     };
 
-    private static final Scanner scanner = new Scanner(System.in);
+    //private static final Scanner scanner = new Scanner(System.in);
     private static final Random random = new Random();
 
     private static final StringBuilder HIDDEN_WORD = new StringBuilder();
@@ -78,41 +78,39 @@ public class Hangman {
     private static final String WORDS_FILE_PATH = "words.txt";
     private static final String HIDE_SYMBOL = "_";
     private static final int MAX_MISTAKES = 6;
-    private static final int ALL_LETTERS_GUESSED = 0;
 
-    private static int MISTAKES_COUNT;
-    private static char MY_GUESS;
-
-    private static List<String> LIST_OF_WORDS = new ArrayList<>();
-
-    private static String RANDOM_WORD;
-    private static int LETTERS_TO_GUESS;
-
+    private static int mistakesCount;
+    private static char myGuess;
+    private static List<String> listOfWords = new ArrayList<>();
+    private static String randomSecretWord;
+    private static int letterToGuess;
 
     public static void main(String[] args) {
         readFile();
-        while (isGameStarted()) {
-            startGameLoop();
+        try (Scanner scanner = new Scanner(System.in)) {
+            while (isGameStarted(scanner)) {
+                startGameLoop(scanner);
+            }
         }
     }
 
     private static void readFile() {
         try {
-            LIST_OF_WORDS = Files.readAllLines(Paths.get(WORDS_FILE_PATH));
+            listOfWords = Files.readAllLines(Paths.get(WORDS_FILE_PATH));
         } catch (IOException e) {
             System.out.println("no such file...");
         }
     }
 
     private static String getRandomWord() {
-        return LIST_OF_WORDS.get(random.nextInt(LIST_OF_WORDS.size())).trim().toLowerCase();
+        return listOfWords.get(random.nextInt(listOfWords.size())).trim().toLowerCase();
     }
 
-    private static boolean isGameStarted() {
+    private static boolean isGameStarted(Scanner scanner) {
         while (true) {
             System.out.println(" ");
-            System.out.println("try to guess an english word or die");
-            System.out.println("WANNA PLAY HANGMAN?" + " \n" + " 1 - YES    0 - NO ");
+            System.out.println("HANGMAN GAME: TRY to guess an english word or DIE");
+            System.out.println("WANNA PLAY WITH ME?" + " \n" + " 1 - YES    0 - NO ");
 
             String choice = scanner.next();
             switch (choice) {
@@ -128,46 +126,46 @@ public class Hangman {
     }
 
     private static void clearStats() {
-        MISTAKES_COUNT = 0;
-        LETTERS_TO_GUESS = RANDOM_WORD.length();
+        mistakesCount = 0;
+        letterToGuess = randomSecretWord.length();
         USED_LETTERS.clear();
-        hideTheWord(RANDOM_WORD);
+        hideSecretWord(randomSecretWord);
     }
 
-    private static void startGameLoop() {
+    private static void startGameLoop(Scanner scanner) {
         System.out.println(" ");
         System.out.println("NEW GAME STARTED");
-        RANDOM_WORD = getRandomWord();
+        randomSecretWord = getRandomWord();
         clearStats();
-        guessingLoop();
+        guessingLoop(scanner);
     }
 
     private static boolean isGameStillPlaying() {
-        if (MISTAKES_COUNT == MAX_MISTAKES) {
+        if (mistakesCount == MAX_MISTAKES) {
             System.out.println("GAME OVER :( ");
-            System.out.println("the word was: " + RANDOM_WORD);
+            System.out.println("the word was: " + randomSecretWord);
             return false;
-        } else if (LETTERS_TO_GUESS == ALL_LETTERS_GUESSED) {
+        } else if (letterToGuess == 0) {
             System.out.println(" :) WIN ! ");
-            System.out.println("the word was: " + RANDOM_WORD);
+            System.out.println("the word was: " + randomSecretWord);
             return false;
         }
         return true;
     }
 
-    private static void guessingLoop() {
+    private static void guessingLoop(Scanner scanner) {
         while (true) {
-            printHangmanStage(MISTAKES_COUNT);
+            printHangmanStage(mistakesCount);
             printHiddenWord();
             if (!isGameStillPlaying()) {
                 break;
             }
-            getUserInput();
-            if (!isInputValid(MY_GUESS)) {
+            getUserInput(scanner);
+            if (!isInputValid(myGuess)) {
                 continue;
             }
-            USED_LETTERS.add(MY_GUESS);
-            if (RANDOM_WORD.contains(String.valueOf(MY_GUESS))) {
+            USED_LETTERS.add(myGuess);
+            if (randomSecretWord.contains(String.valueOf(myGuess))) {
                 guessIsRight();
             } else {
                 guessIsNotRight();
@@ -179,7 +177,7 @@ public class Hangman {
         System.out.println(HANGMAN_STAGES[mistakes]);
     }
 
-    private static void hideTheWord(String randomWord) {
+    private static void hideSecretWord(String randomWord) {
         HIDDEN_WORD.setLength(0);
         HIDDEN_WORD.append(HIDE_SYMBOL.repeat(randomWord.length()));
     }
@@ -188,16 +186,16 @@ public class Hangman {
         System.out.println("the word: " + HIDDEN_WORD);
     }
 
-    private static void getUserInput() {
+    private static void getUserInput(Scanner scanner) {
         System.out.println("type your guess, one letter:");
-        MY_GUESS = scanner.next().toLowerCase().charAt(0);
+        myGuess = scanner.next().toLowerCase().charAt(0);
     }
 
-    private static boolean isInputValid(char myGuess) {
-        if (USED_LETTERS.contains(myGuess)) {
-            System.out.println("you already used this letter: " + myGuess + "!");
+    private static boolean isInputValid(char userGuess) {
+        if (USED_LETTERS.contains(userGuess)) {
+            System.out.println("you already used this letter: " + userGuess + "!");
             return false;
-        } else if (!Character.isLetter(myGuess) || myGuess < 'a' || myGuess > 'z') {
+        } else if (!Character.isLetter(userGuess) || userGuess < 'a' || userGuess > 'z') {
             System.out.println("type a correct english letter. no numbers or symbols");
             return false;
         }
@@ -214,22 +212,22 @@ public class Hangman {
     private static void mistakeMessage() {
         System.out.println("oops MISTAKE!\n" +
                 "used letters: " + USED_LETTERS + "\n" +
-                "number of mistakes: " + MISTAKES_COUNT + "\n" +
-                "number of tries left: " + (MAX_MISTAKES - MISTAKES_COUNT));
+                "number of mistakes: " + mistakesCount + "\n" +
+                "number of tries left: " + (MAX_MISTAKES - mistakesCount));
     }
 
     private static void guessIsRight() {
-        for (int i = 0; i < RANDOM_WORD.length(); i++) {
-            if (MY_GUESS == RANDOM_WORD.charAt(i)) {
-                HIDDEN_WORD.setCharAt(i, MY_GUESS);
-                LETTERS_TO_GUESS--;
+        for (int i = 0; i < randomSecretWord.length(); i++) {
+            if (myGuess == randomSecretWord.charAt(i)) {
+                HIDDEN_WORD.setCharAt(i, myGuess);
+                letterToGuess--;
             }
         }
-        rightGuessMessage(MISTAKES_COUNT);
+        rightGuessMessage(mistakesCount);
     }
 
     private static void guessIsNotRight() {
-        MISTAKES_COUNT++;
+        mistakesCount++;
         mistakeMessage();
     }
 }
