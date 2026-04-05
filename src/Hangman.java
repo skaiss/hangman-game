@@ -114,6 +114,8 @@ public class Hangman {
             String choice = scanner.next();
             switch (choice) {
                 case "1":
+                    System.out.println(" ");
+                    System.out.println("NEW GAME STARTED");
                     return true;
                 case "0":
                     System.out.println("bye...");
@@ -132,8 +134,6 @@ public class Hangman {
     }
 
     private static void startGameLoop(Scanner scanner) {
-        System.out.println(" ");
-        System.out.println("NEW GAME STARTED");
         randomSecretWord = getRandomWord();
         clearStats();
         guessingLoop(scanner);
