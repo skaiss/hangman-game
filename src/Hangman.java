@@ -69,7 +69,6 @@ public class Hangman {
       ==========="""
     };
 
-    //private static final Scanner scanner = new Scanner(System.in);
     private static final Random random = new Random();
 
     private static final StringBuilder HIDDEN_WORD = new StringBuilder();
